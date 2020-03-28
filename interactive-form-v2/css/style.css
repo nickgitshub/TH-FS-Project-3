@@ -180,6 +180,11 @@ option {
   clear: both;
 }
 
+.error-message{
+	color:red;
+	margin-bottom: 8px;
+}
+
 /* ================================= 
   Media Queries
 ==================================== */
