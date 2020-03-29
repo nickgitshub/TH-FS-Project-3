@@ -1,27 +1,43 @@
+/*** HELPER FUNCTIONS ***/
 
+//enables toggling of element's display style between '' and 'None'
 function displayElement(element, alternator){
+	
 	if (alternator === true){
-		element.display = '';
+		element.style.display = '';
 	} else if (alternator === false){
-		element.display = 'None';
+		element.style.display = 'None';
 	}
 }
 
-// just below the ‘Job Role’ `select` element, create a text input
-// element, set its `name` attribute to “job_role_other”, set its `placeholder` attribute to
-// “Your Job Role”, and give it an `id` attribute of “other-title”
+//allows a list to be fed into displayElement
+function listDisplay(list, alternator){
+	for (let e of list){
+		displayElement(e, alternator)
+	}
+}
 
-const otherInput = document.createElement("INPUT")
-otherInput.name = "job_role_other";
-otherInput.placeholder = "Your Job Role";
-otherInput.id = "other-title";
+
+/*** Job Role Event Activity***/
+
+//code fo dynamically adding the job role input field if that is later required. 
+//I added it to index.html for now so that the field would appear absent the javascript running
+
+
+
+// const otherInput = document.createElement("INPUT")
+// otherInput.name = "job_role_other";
+// otherInput.placeholder = "Your Job Role";
+// otherInput.id = "other-title";
+// otherInput.style.display = 'None';
+
+// const firstFieldSet = document.querySelector(".container form")[0]
+// firstFieldSet.appendChild(otherInput);
+
+
+//listen for 'Other' to be selected in the title field and then display the input field
+const otherInput = document.getElementById('other-title')
 otherInput.style.display = 'None';
-
-const firstFieldSet = document.querySelector(".container form")[0]
-firstFieldSet.appendChild(otherInput);
-
-// In your JavaScript file, target the ‘Other’ input field, and hide it initially, so that it will
-// display if JavaScript is disabled, but be hidden initially with JS.
 
 const titleOptions= document.querySelector('#title');
 titleOptions.addEventListener('change', (e)=>{
@@ -34,21 +50,9 @@ titleOptions.addEventListener('change', (e)=>{
 })
 
 
-/***
+/*** T-Shirt Event Activity***/
 
-Until a theme is selected from the “Design” menu, no color options appear in the “Color” drop down and the “Color” field reads “Please select a T-shirt theme”.
-
-
-For the T-Shirt "Color" menu, after a user selects a theme, only display the color options that match the design selected in the "Design" menu.
-
-	If the user selects "Theme - JS Puns" then the color menu should only display "Cornflower Blue," "Dark Slate Grey," and "Gold."
-
-	If the user selects "Theme - I ♥ JS" then the color menu should only display "Tomato," "Steel Blue," and "Dim Grey."
-
-When a new theme is selected from the "Design" menu, both the "Color" field and drop down menu is updated.
-
-***/
-
+//select elements related to selecting theme and color of the shirt
 const shirtDesign = document.getElementById('design');
 const shirtColorSelect = document.getElementById('color');
 const shirtColorLabel = shirtColorSelect.previousElementSibling
@@ -59,61 +63,62 @@ for (let option of shirtColorOptions) {
 		displayElement(option, false);
 	}
 }
-shirtColorSelect.style.display = 'None'
-shirtColorLabel.style.display = 'None'
 
+//initially hide the color selector until a theme has been selected
+listDisplay([shirtColorSelect, shirtColorLabel], false);
 
 shirtDesign.addEventListener('change', (e)=>{
 	
-	const themeSearchDictionary = {"js puns":"JS Puns", "heart js": "I ♥ JS"}
+	const themeSearchDictionary = 
+	{
+		"js puns":"JS Puns", 
+		"heart js": "I ♥ JS"
+	}
+
 	const selectedTheme = themeSearchDictionary[e.target.value]; 
 	let themeList = []
 
+	//this is going through the list of available colors, testing whether the match the theme using the .search() function,
+	//and then hiding all the color elements that don't match the theme
 	for (o = 0; o < shirtColorOptions.length; o++){
 		const currentOption = shirtColorOptions[o]
 		if (currentOption.text.search(selectedTheme) > -1 && selectedTheme !== undefined) {
-			currentOption.style.display = '';
+			displayElement(currentOption, true);
 			themeList.push(currentOption)
-		}
-		else {
-			currentOption.style.display = 'None';
+		} else {
+			displayElement(currentOption, false);
 		}
 	}
 
+	//this ensures the color element will remain hidden if a theme isn't selected and it will makes the default selection the 
+	//first color that matches the theme
 
-	//When the 'Select Theme' is chosen, hide the colors
-	//When a theme is select, make the first color of that theme the default color
 	if (themeList.length === 0) {
-		shirtColorSelect.style.display = 'None'
-		shirtColorLabel.style.display = 'None'
-
+		listDisplay([shirtColorSelect, shirtColorLabel], false);
 	} else {
-		shirtColorSelect.style.display = ''
-		shirtColorLabel.style.display = ''
+		listDisplay([shirtColorSelect, shirtColorLabel], true);
 		shirtColorSelect.value = themeList[0].value
 	}
+});
 
-})
 
+/*** Register for Activities Event Activity***/
 
-// Some events are at the same day and time as others. If the user selects a workshop, 
-// don't allow selection of a workshop at the same day and time -- 
-// you should disable the checkbox and visually indicate that the workshop in the competing time slot isn't available.
-
-// When a user unchecks an activity, make sure that competing activities (if there are any) are no longer disabled.
-
-// As a user selects activities, a running total should display below the list of checkboxes. 
-// For example, if the user selects "Main Conference", then Total: $200 should appear. If they add 1 workshop, the total should change to Total: $300.
-
+//global variables for selecting activities
 const activitiesField = document.querySelector('.activities')
 const activitiesInputs = activitiesField.querySelectorAll('input')
+const activitiesLabels = activitiesField.getElementsByTagName('LABEL')
+const lastLabelOfActivities = activitiesLabels[activitiesLabels.length-1]
 
+
+//listening for any of the checkboxes within activities to be changed
 activitiesField.addEventListener('change', (e)=>{
 	const eventChecked = e.target.checked
 	const eventDT = e.target.getAttribute('data-day-and-time');
 	const eventName = e.target.name
 	let totalCostSum = 0
 
+	//iterating through all of the checkboxes to take action depending on whether or not they are checked
 	for (let a of activitiesInputs){
 		//disabling conflicting time slots
 		const workshopDT = a.getAttribute('data-day-and-time')
@@ -127,15 +132,28 @@ activitiesField.addEventListener('change', (e)=>{
 		//adding the cost of the checkedboxes
 		if (a.checked){
 			totalCostSum += parseInt(a.getAttribute('data-cost'))
+
+			//function that offsets the red text color chanages that would happen if there's an error when clicking 'Register'
+			for (let a of activitiesField.getElementsByTagName('LABEL')){
+				a.style.color = "#000";
+			}
+
+			if (lastLabelOfActivities.nextElementSibling){
+				if(lastLabelOfActivities.nextElementSibling.className === "error-message"){
+					lastLabelOfActivities.nextElementSibling.remove()
+				}
+			}
 		}
 
 	}
 
+	//cleaning up previous totals that may have been added
 	const currentTotalCostElement = activitiesField.getElementsByTagName("P");
 	if (currentTotalCostElement[0] !== undefined) {
 		currentTotalCostElement[0].remove()
 	}
 
+	//adding a paragraph element to show the total cost
 	const totalCostElement = document.createElement("P")
 	if (totalCostSum > 0) {
 		totalCostElement.textContent = "Total Cost: $" + totalCostSum
@@ -144,21 +162,18 @@ activitiesField.addEventListener('change', (e)=>{
 })
 
 
-// Display payment sections based on the payment option chosen in the select menu.
-// The "Credit Card" payment option should be selected by default. Display the #credit-card div, 
-//and hide the "PayPal" and "Bitcoin" information. Payment option in the select menu should match the payment option displayed on the page.
-// When a user selects the "PayPal" payment option, the PayPal information should display, and the credit card and “Bitcoin” information should be hidden.
-// When a user selects the "Bitcoin" payment option, the Bitcoin information should display, and the credit card and “PayPal” information should be hidden.
-// NOTE: The user should not be able to select the "Select Payment Method" option from the payment select menu, 
-//because the user should not be able to submit the form without a chosen payment option.
+/*** Payment Event Activity***/
 
+//global variables for selecting payment mtehods
 const paymentSelect = document.getElementById('payment')
 const paymentOptions = paymentSelect.getElementsByTagName("OPTION")
 
+//remove 'select method' from payment options
+//'select method' should only show it the Javascript isn't running
 paymentOptions[0].remove()
-document.getElementById('paypal').style.display = 'None'
-document.getElementById('bitcoin').style.display = 'None'
+listDisplay([document.getElementById('paypal'), document.getElementById('bitcoin')], false);
 
+//only display the payment information for the selected payment method
 paymentSelect.addEventListener('change', (e)=>{
 	const selectedValue = paymentSelect.value
 	for (let p of paymentOptions){
@@ -166,11 +181,11 @@ paymentSelect.addEventListener('change', (e)=>{
 		if (p.value !== "select method"){
 			const alterElement = document.getElementById(p.value)
 			if(p.value !== selectedValue){
-				alterElement.style.display = 'None'
+				displayElement(alterElement, false);
 
 			} 
 			else if (p.value === selectedValue) {
-				alterElement.style.display = ''
+				displayElement(alterElement, true);
 			}
 		}
 		
@@ -178,79 +193,91 @@ paymentSelect.addEventListener('change', (e)=>{
 	
 })
 
-// Form validation
-// Project Warm Up: Creating custom form input validation can be tricky, as it can have several moving parts. For some helpful practice, check out the project Warm Up Form Input Validation.
-// If any of the following validation errors exist, prevent the user from submitting the form:
-// User must select at least one checkbox under the "Register for Activities" section of the form.
-// NOTE: Don't rely on the built in HTML5 validation by adding the required attribute to your DOM elements. You need to actually create your own custom validation checks and error messages.
-// NOTE: Avoid using snippets or plugins for this project. To get the most out of the experience, you should be writing all of your own code for your own custom validation.
-// NOTE: Make sure your validation is only validating Credit Card info if Credit Card is the selected payment method.
 
-// Name field can't be blank.
+/*** Error Checking and Input Validation***/
 
-// Email field must be a validly formatted e-mail address (you don't have to check that it's a real e-mail address, just that it's formatted like one: dave@teamtreehouse.com for example.
-
-// If the selected payment option is "Credit Card," make sure the user has supplied a Credit Card number, a Zip Code, and a 3 number CVV value before the form can be submitted.
-// Credit Card field should only accept a number between 13 and 16 digits.
-// The Zip Code field should accept a 5-digit number.
-// The CVV should only accept a number that is exactly 3 digits long.
-
-
-// Form validation messages
-// Provide some kind of indication when there’s a validation error. The field’s borders could turn red, for example, or even better for the user would be if a red text message appeared near the field.
-// The following fields should have some obvious form of an error indication:
-// Name field
-// Email field
-// Register for Activities checkboxes (at least one must be selected)
-// Credit Card number (Only if Credit Card payment method is selected)
-// Zip Code (Only if Credit Card payment method is selected)
-// CVV (Only if Credit Card payment method is selected)
-
+//dictionary for storing error messagesand Regex validators for elements that need to be validated
+//the keys are the elements className
 const errorDictionary = {
 	"name": {
 		"regex": /^[A-Za-z ]+$/,
-		"errorMessage": "Name should be letters and spaces only."
+		"errorMessage": "Name should be letters and spaces only.",
+		"blankMessage": "Please enter something in the name field."
 	},
 	"mail": {
 		"regex": /^[^@]+@[^@.]+\.[a-z]+$/i,
-		"errorMessage":"Need a valid email."
+		"errorMessage":"Need a valid email.",
+		"blankMessage": "Please enter an email."
 	},
 	"cc-num": {
 		"regex": /^\d{13,16}$/,
-		"errorMessage":"Credit Card must be between 13 and 16 characters"
+		"errorMessage":"Credit Card must be between 13 and 16 characters",
+		"blankMessage": "Please enter a credit card number."
 	},
 	"zip": {
 		"regex": /^\d{5}$/,
-		"errorMessage":"Zip code must be five digits."
+		"errorMessage":"Zip code must be five digits.",
+		"blankMessage": "Please enter a zip code."
 	},
 	"cvv": {
 		"regex": /^\d{3}$/,
-		"errorMessage":"CVV must be only 3 numbers."
+		"errorMessage":"CVV must be only 3 numbers.",
+		"blankMessage": "Please enter a CVV"
 	}
 }
 
+//helper functions for validateElement
+function addErrorMessage(element, errorText){
+	element.style.borderColor = "red";
+	element.insertAdjacentHTML('afterend', '<span class="error-message">' + errorText + '</span>')
+	element.style.marginBottom = "0em";
+}
 
+function removePriorErrorMessage(element){
+	element.style.borderColor=null;
+	element.nextSibling.remove()
+	element.style.marginBottom = "1.125em";
+}
+
+//event handler for adding and removing error messages from the page
 function validateElement(elementId){
 	const element = document.getElementById(elementId)
 	const elementValue = element.value; 
 	const regex = errorDictionary[elementId].regex
 	const validation = regex.test(element.value)
 	const errorMessage = errorDictionary[elementId].errorMessage
+	const blankMessage = errorDictionary[elementId].blankMessage
 
+	//if there isn't an existing error message, it will add a blankMessage or errorMessage
 	if(validation !== true && element.nextSibling.className !== "error-message"){
-		element.style.borderColor = "red";
-		element.insertAdjacentHTML('afterend', '<span class="error-message">' + errorMessage + '</span>')
-		element.style.marginBottom = "0em";
+		if (elementValue === ''){
+			addErrorMessage(element, blankMessage)
+		} else {
+			addErrorMessage(element, errorMessage)
+		}
+	//these next two conditions look for existing error messages and changes 
+	//or removes the error message depending on the current state of the input field
+	}else if (validation !== true && element.nextSibling.className === "error-message"){
+		const priorError = element.nextSibling.innerText 
+		if (elementValue === ''){
+			if (priorError !== blankMessage){
+				removePriorErrorMessage(element)
+				addErrorMessage(element, blankMessage)
+			}
+		} else {
+			if (priorError === blankMessage){
+				removePriorErrorMessage(element)
+				addErrorMessage(element, errorMessage)
+			}
+		}
 	}else if(validation===true && element.nextSibling.className === "error-message") {
-		element.style.borderColor=null;
-		element.nextSibling.remove()
-		element.style.marginBottom = "1.125em";
+		removePriorErrorMessage(element)
 	}
 }
 
+//function that creates event handlers for every element in the error dictionary
 function loadValidationListen(errorDictionary){
 	for (let id in errorDictionary){
-		console.log(id)
 		document.getElementById(id).addEventListener('input', ()=>{validateElement(id)})
 	}
 }
@@ -258,17 +285,28 @@ function loadValidationListen(errorDictionary){
 loadValidationListen(errorDictionary)
 
 
+//'Register' button event listener
 document.getElementsByTagName("BUTTON")[0].addEventListener('click', (e)=>{
 	e.preventDefault()
+
+	//does a validation check for every element in the errorDictionary
 	for (let id in errorDictionary){
 		validateElement(id)
 	}
+
+	//ensure that at least one activity is checked or errors will throw
+	let truthCheck = false;
+	for (a of activitiesInputs){
+		if (a.checked === true){
+			truthCheck = true;
+		}
+	}
+	
+	if (truthCheck === false){
+		for (let a of activitiesLabels){
+			a.style.color = "red";
+		}
+		lastLabelOfActivities.insertAdjacentHTML('afterend', '<span class="error-message">Must select at least one activity.</span>')
+	}
+
 })
-
-
-
-// Note: Error messages or indications should not be visible by default. They should only show upon submission, or after some user interaction.
-
-// Note: Avoid use alerts for your validation messages.
-
-// Note: If a user tries to submit an empty form, there should be an error indication or message displayed for the name field, the email field, the activity section, and the credit card fields if credit card is the selected payment method.
