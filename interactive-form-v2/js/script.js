@@ -308,6 +308,8 @@ document.getElementsByTagName("BUTTON")[0].addEventListener('click', (e)=>{
 		lastLabelOfActivities.insertAdjacentHTML('afterend', '<span class="error-message">Must select at least one activity.</span>')
 	}
 
+	//checks the DOM for any "error-message" elements, which would only be there's an error
+	//if there is an error, it prevents the submission of the form until the error is fixed
 	if (document.getElementsByClassName("error-message").length > 0){
 		e.preventDefault();
 	}
