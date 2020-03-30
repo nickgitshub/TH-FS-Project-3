@@ -287,7 +287,6 @@ loadValidationListen(errorDictionary)
 
 //'Register' button event listener
 document.getElementsByTagName("BUTTON")[0].addEventListener('click', (e)=>{
-	e.preventDefault()
 
 	//does a validation check for every element in the errorDictionary
 	for (let id in errorDictionary){
@@ -307,6 +306,10 @@ document.getElementsByTagName("BUTTON")[0].addEventListener('click', (e)=>{
 			a.style.color = "red";
 		}
 		lastLabelOfActivities.insertAdjacentHTML('afterend', '<span class="error-message">Must select at least one activity.</span>')
+	}
+
+	if (document.getElementsByClassName("error-message").length > 0){
+		e.preventDefault();
 	}
 
 })
