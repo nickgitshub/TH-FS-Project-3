@@ -211,7 +211,7 @@ const errorDictionary = {
 	},
 	"cc-num": {
 		"regex": /^\d{13,16}$/,
-		"errorMessage":"Credit Card must be between 13 and 16 characters",
+		"errorMessage":"Credit Card must be between 13 and 16 numbers",
 		"blankMessage": "Please enter a credit card number."
 	},
 	"zip": {
@@ -285,8 +285,8 @@ function loadValidationListen(errorDictionary){
 loadValidationListen(errorDictionary)
 
 
-//'Register' button event listener
-document.getElementsByTagName("BUTTON")[0].addEventListener('click', (e)=>{
+//event listener for form submission
+document.getElementsByTagName("FORM")[0].addEventListener('submit', (e)=>{
 
 	//does a validation check for every element in the errorDictionary
 	for (let id in errorDictionary){
@@ -308,9 +308,16 @@ document.getElementsByTagName("BUTTON")[0].addEventListener('click', (e)=>{
 		lastLabelOfActivities.insertAdjacentHTML('afterend', '<span class="error-message">Must select at least one activity.</span>')
 	}
 
-	//checks the DOM for any "error-message" elements, which would only be there's an error
-	//if there is an error, it prevents the submission of the form until the error is fixed
-	if (document.getElementsByClassName("error-message").length > 0){
+	//checks the DOM for when the number of "error-message" elements is greater than 0, which would only occur
+	//if there is an error. Submission will be prevented until the error is corrected.
+	//if the credit card payment option is not selected, it will remove any errors there from the total element error count
+	const isCreditCardHidden = document.getElementById('credit-card').style.display === 'none';
+	const numOfErrorElements = document.getElementsByClassName("error-message").length;
+	const numOfCreditCardFieldErrors = document.querySelectorAll('#credit-card .error-message').length
+
+	if (isCreditCardHidden === false && numOfErrorElements > 0){
+		e.preventDefault();
+	} else if (isCreditCardHidden === true && numOfErrorElements - numOfCreditCardFieldErrors > 0) {
 		e.preventDefault();
 	}
 
